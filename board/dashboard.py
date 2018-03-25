@@ -79,7 +79,6 @@ app.layout = render
 
 callback_init()
 
-
 # Это пример коллбека, выполняется по таймеру и обновляет страницу без ее перезагрузки (декораток творит магию)
 @app.callback(Output('history-graph', 'figure'),
               [Input('Interval', 'n_intervals'), Input('Counter', 'value'),Input('Parametrs', 'value')])

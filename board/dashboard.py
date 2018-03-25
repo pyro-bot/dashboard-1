@@ -69,10 +69,8 @@ callback_init()
 @app.callback(Output('history-graph', 'figure'),
               [Input('Interval', 'n_intervals'), Input('Counter', 'value'),Input('Parametrs', 'value')])
 def get_history(tick,param):
-
-    new = db(value=rnd.random(),counters_parametr=rnd.choice(db).all())
-    #new = dxx(value=rnd.random(),counters_parametr=rnd.choice(dxx).all())
-    #new = models.History(value=rnd.random(), counters_parametr=rnd.choice(db.session.query(models.CountersParametr).all()))
+    new = models.History(value=rnd.random(),
+                         counters_parametr=rnd.choice(db.session.query(models.CountersParametr).all()))
     db.session.add(new)
     db.session.commit()
     return {

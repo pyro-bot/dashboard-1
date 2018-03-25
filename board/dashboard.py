@@ -32,7 +32,8 @@ def render():
                 html.H3('Счетчик'),
                 dcc.Dropdown(
                     id='Counter',
-                    options=[{'label': i['name'], 'value': i['id_counters']} for i in db.engine.execute('Select * from Counters')],
+                    options=[{'label': i['name'], 'value': i['id_counters']} for i in db.engine.execute(
+                        'Select * from counters_parametrs join counters on counters_parametrs.id_counters = counters.id_counters')],
                     value=0
                 ),
             ],
@@ -41,8 +42,10 @@ def render():
             html.Div([
                 html.H3('Показания'),
                 dcc.Dropdown(
-                    id='Parametrs',
-                    options=[{'label': i['name'], 'value': i['id_parametrs']} for i in db.engine.execute('Select * from Parametrs')],
+                    id='parametr',
+                    options=[{'label': i['name'] + "(" + i['unit'] + ')', 'value': i['id_parametrs']} for i in
+                             db.engine.execute(
+                                 'Select * from counters_parametrs join parametrs on counters_parametrs.id_parametrs = parametrs.id_parametrs')],
                     value=0
                 ),
             ], style={'width': '49%', 'float': 'right', 'display': 'inline-block'}),
@@ -73,7 +76,6 @@ def render():
         ],
         ),
     ]))
-
 # Это описание веб страницы
 app.layout = render
 
@@ -81,28 +83,39 @@ callback_init()
 
 # Это пример коллбека, выполняется по таймеру и обновляет страницу без ее перезагрузки (декораток творит магию)
 @app.callback(Output('history-graph', 'figure'),
-              [Input('Interval', 'n_intervals'), Input('Counter', 'value'),Input('Parametrs', 'value')])
+              [Input('Interval', 'n_intervals'), Input('Counter', 'value'), Input('parametr', 'value')])
 def get_history(tick,param):
-    df = db.engine.execute('select * from History')
-    new = df(value=rnd.random(), counters_parametr=rnd.choice(db.engine.execute('select * from Counters_parametrs')))
+    # df = db.engine.execute('select * from History')
+    # new = df(value=rnd.random(), counters_parametr=rnd.choice(db.engine.execute('select * from Counters_parametrs')))
+
+    # тут осуществляю связь многие ко многим ,чтоб параметры могли быть равны value=values and time = time
+    new = db.engine.execute("select * from counters_parametrs join val on "
+                            "counters_parametrs.id_counters_parametrs = val.id_counters_parametrs "
+                            "UNION "
+                            "select * from counters_parametrs join history on "
+                            "counters_parametrs.id_counters_parametrs = history.id_counters_parametrs where value = values and time =time")
+    # commit
     db.session.add(new)
     db.session.commit()
+
+
     return {
-        'data': [
-            {
-                'y': [record.value for record in
-                      db.engine.execute('select values from counters_parametrs' == param).order_by(
-                          df.time.desc()).limit(20).all()],
-                'type': 'scatter',
+        'data': [go.Scatter(
+            # тут я хочу привязать данные из списка к history
+            # пытаюсь вывести это на график
+            x=new[new['time'] == tick]['Value'],
+            y=new[new['values'] == param]['Value'],
+            mode='markers',
+            marker={
+                'size': 15,
+                'opacity': 0.5,
+                'line': {'width': 0.5, 'color': 'white'}
             }
-        ],
-        'layout': {
-            'margin': {
-                'l': 30,
-                'r': 0,
-                'b': 30,
-                't': 0
-            },
-            'legend': {'x': 0, 'y': 1}
-        }
+        )],
+        'layout': go.Layout(
+
+            margin={'l': 40, 'b': 30, 't': 10, 'r': 0},
+            height=450,
+            hovermode='closest'
+        )
     }

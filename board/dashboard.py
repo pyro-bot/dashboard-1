@@ -83,15 +83,16 @@ callback_init()
 @app.callback(Output('history-graph', 'figure'),
               [Input('Interval', 'n_intervals'), Input('Counter', 'value'),Input('Parametrs', 'value')])
 def get_history(tick,param):
-    new = models.History(value=rnd.random(),
-                         counters_parametr=rnd.choice(db.session.query(models.CountersParametr).all()))
+    df = db.engine.execute('select * from History')
+    new = df(value=rnd.random(), counters_parametr=rnd.choice(db.engine.execute('select * from Counters_parametrs')))
     db.session.add(new)
     db.session.commit()
     return {
         'data': [
             {
-                'y': [record.value for record in df.filter(db.id_counters_parametrs==param).order_by(df.time.desc()).limit(20).all()],
-
+                'y': [record.value for record in
+                      db.engine.execute('select values from counters_parametrs' == param).order_by(
+                          df.time.desc()).limit(20).all()],
                 'type': 'scatter',
             }
         ],

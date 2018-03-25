@@ -59,7 +59,6 @@ def render():
         ),
     ]))
 
-
 # Это описание веб страницы
 app.layout = render
 

@@ -19,8 +19,6 @@ app.css.append_css({
 
 #Метод нужен для первоначальной отрисовки страицы
 
-
-
 def render():
     return page.get_layout(html.Div([
         dcc.Interval(
@@ -34,7 +32,7 @@ def render():
                 html.H3('Счетчик'),
                 dcc.Dropdown(
                     id='Counter',
-                    options=[{'label': i['name'], 'value': i['id_counters']} for i in db.session.query(models.Counter)],
+                    options=[{'label': i['name'], 'value': i['id_counters']} for i in db.engine.execute('Select * from Counters')],
                     value=0
                 ),
             ],
@@ -43,10 +41,9 @@ def render():
             html.Div([
                 html.H3('Показания'),
                 dcc.Dropdown(
-
-                        id='Counter',
-                        options=[{'label': i['name'], 'value': i['id_counters']} for i in db.session.query(models.Parametr)],
-                        value=0
+                    id='Parametrs',
+                    options=[{'label': i['name'], 'value': i['id_parametrs']} for i in db.engine.execute('Select * from Parametrs')],
+                    value=0
 
                 ),
             ], style={'width': '49%', 'float': 'right', 'display': 'inline-block'})
@@ -71,7 +68,7 @@ callback_init()
 
 # Это пример коллбека, выполняется по таймеру и обновляет страницу без ее перезагрузки (декораток творит магию)
 @app.callback(Output('history-graph', 'figure'),
-              [Input('Interval', 'n_intervals'), Input('Counter', 'value')])
+              [Input('Interval', 'n_intervals'), Input('Counter', 'value'),Input('Parametrs', 'value')])
 def get_history(tick,param):
 
     new = db(value=rnd.random(),counters_parametr=rnd.choice(db).all())

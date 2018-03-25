@@ -1,7 +1,8 @@
 import dash_html_components as html
 
 def get_layout(body=None):
-    return html.Div(className='container', children=[
+    return html.Div(className='container', style={'borderBottom': 'thin lightgrey solid',
+                                                  'backgroundColor': 'rgb(212, 232, 241)'}, children=[
         get_header('Показания счетчиков'),
         get_content(body or [])
     ])

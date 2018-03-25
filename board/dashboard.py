@@ -44,13 +44,28 @@ def render():
                     id='Parametrs',
                     options=[{'label': i['name'], 'value': i['id_parametrs']} for i in db.engine.execute('Select * from Parametrs')],
                     value=0
-
                 ),
-            ], style={'width': '49%', 'float': 'right', 'display': 'inline-block'})
+            ], style={'width': '49%', 'float': 'right', 'display': 'inline-block'}),
+
+            html.Div(
+                [
+                    html.Button('Насос', id='Nasos', style={
+                        'width': '15%', 'display': 'inline-block', 'margin': '1%'}),
+                    html.Button('Нагреватель1', id='Nagrev', style={
+                        'width': '15%', 'display': 'inline-block', 'margin': '1%'}),
+                    html.Button('Нагреватель2', id='Nagrev', style={
+                        'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
+                    html.Button('Нагреватель3', id='Nagrev', style={
+                        'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
+                    html.Button('Клапан', id='Klap', style={
+                        'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
+                    html.Button('Вентиль', id='Valve', style={
+                        'display': 'inline-block', 'width': '13%', 'margin': '1%'})
+                ])
         ], style={
             'borderBottom': 'thin lightgrey solid',
-            'backgroundColor': 'rgb(250, 250, 250)',
-            'padding': '10px 5px'
+            'backgroundColor': 'rgb(212, 232, 241)',
+            'padding': '15px 5px'
         }),
 
         html.Div([

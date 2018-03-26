@@ -10,14 +10,15 @@ import plotly.graph_objs as go
 import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
-from sqlalchemy import inspect
+from sqlalchemy import inspect, text
 
 rnd = random.Random()
 
 app.css.append_css({
     "external_url": ['/static/css/bootstrap.css', '/static/css/bootstrap-theme.css']})
 
-#Метод нужен для первоначальной отрисовки страицы
+
+# Метод нужен для первоначальной отрисовки страицы
 
 def render():
     return page.get_layout(html.Div([
@@ -33,7 +34,7 @@ def render():
                 dcc.Dropdown(
                     id='Counter',
                     options=[{'label': i['name'], 'value': i['id_counters']} for i in db.engine.execute(
-                        'Select * from counters_parametrs join counters on counters_parametrs.id_counters = counters.id_counters')],
+                        'SELECT * FROM counters')],
                     value=0
                 ),
             ],
@@ -43,9 +44,7 @@ def render():
                 html.H3('Показания'),
                 dcc.Dropdown(
                     id='parametr',
-                    options=[{'label': i['name'] + "(" + i['unit'] + ')', 'value': i['id_parametrs']} for i in
-                             db.engine.execute(
-                                 'Select * from counters_parametrs join parametrs on counters_parametrs.id_parametrs = parametrs.id_parametrs')],
+                    options=[],
                     value=0
                 ),
             ], style={'width': '49%', 'float': 'right', 'display': 'inline-block'}),
@@ -76,35 +75,50 @@ def render():
         ],
         ),
     ]))
+
+
 # Это описание веб страницы
 app.layout = render
 
 callback_init()
 
+@app.callback(Output('parametr', 'options'),
+              [Input('Counter', 'value')])
+def get_param(counter):
+    q = db.engine.execute(text(
+"""SELECT name, unit, counters_parametrs.id_counters_parametrs AS id_parametrs 
+    FROM counters_parametrs JOIN parametrs ON counters_parametrs.id_parametrs = parametrs.id_parametrs
+    WHERE id_counters = :counter
+"""),
+        counter=1)
+    buf = [{
+            'label': '{name} ({unit})'.format(**i),
+            'value': i['id_parametrs']
+        }
+        for i in q]
+    return buf
+
 # Это пример коллбека, выполняется по таймеру и обновляет страницу без ее перезагрузки (декораток творит магию)
 @app.callback(Output('history-graph', 'figure'),
-              [Input('Interval', 'n_intervals'), Input('Counter', 'value'), Input('parametr', 'value')])
-def get_history(tick,param):
-    # df = db.engine.execute('select * from History')
-    # new = df(value=rnd.random(), counters_parametr=rnd.choice(db.engine.execute('select * from Counters_parametrs')))
-
+              [Input('Interval', 'n_intervals'),
+               Input('parametr', 'value')])
+def get_history(tick, param):
     # тут осуществляю связь многие ко многим ,чтоб параметры могли быть равны value=values and time = time
-    new = db.engine.execute("select * from counters_parametrs join val on "
-                            "counters_parametrs.id_counters_parametrs = val.id_counters_parametrs "
-                            "UNION "
-                            "select * from counters_parametrs join history on "
-                            "counters_parametrs.id_counters_parametrs = history.id_counters_parametrs where value = values and time =time")
-    # commit
-    db.session.add(new)
-    db.session.commit()
+    query = db.engine.execute(text("""
+    select time, `values` as val from history WHERE id_counters_parametrs = :param
+    """), param=param)
 
+    query = list(query)
+
+    x = [i['time'] for i in query]
+    y = [float(i['val']) for i in query]
 
     return {
         'data': [go.Scatter(
             # тут я хочу привязать данные из списка к history
             # пытаюсь вывести это на график
-            x=new[new['time'] == tick]['Value'],
-            y=new[new['values'] == param]['Value'],
+            # x=x,
+            y=y,
             mode='markers',
             marker={
                 'size': 15,

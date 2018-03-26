@@ -1,10 +1,11 @@
 # coding: utf-8
+from board import db
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, Numeric, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 
-Base = declarative_base()
+Base = db.Model
 metadata = Base.metadata
 
 
@@ -14,7 +15,7 @@ class Counter(Base):
     id_counters = Column(Integer, primary_key=True, nullable=False)
     name = Column(String(45))
     type = Column(Integer)
-    address = Column(String(45), primary_key=True, nullable=False)
+    address = Column(String(45), nullable=False)
     flat = Column(Integer)
 
 

@@ -134,3 +134,4 @@ def get_history(tick, param):
                 'range': [min(0, min(y)), max(50, max(y) + 3)]}
         ),
     }
+

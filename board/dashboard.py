@@ -10,14 +10,16 @@ import plotly.graph_objs as go
 import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
-from sqlalchemy import inspect
+from sqlalchemy import inspect, text
+import numpy as np
 
 rnd = random.Random()
 
 app.css.append_css({
     "external_url": ['/static/css/bootstrap.css', '/static/css/bootstrap-theme.css']})
 
-#Метод нужен для первоначальной отрисовки страицы
+
+# Метод нужен для первоначальной отрисовки страицы
 
 def render():
     return page.get_layout(html.Div([
@@ -33,7 +35,7 @@ def render():
                 dcc.Dropdown(
                     id='Counter',
                     options=[{'label': i['name'], 'value': i['id_counters']} for i in db.engine.execute(
-                        'Select * from counters_parametrs join counters on counters_parametrs.id_counters = counters.id_counters')],
+                        'SELECT * FROM counters')],
                     value=0
                 ),
             ],
@@ -43,79 +45,92 @@ def render():
                 html.H3('Показания'),
                 dcc.Dropdown(
                     id='parametr',
-                    options=[{'label': i['name'] + "(" + i['unit'] + ')', 'value': i['id_parametrs']} for i in
-                             db.engine.execute(
-                                 'Select * from counters_parametrs join parametrs on counters_parametrs.id_parametrs = parametrs.id_parametrs')],
+                    options=[],
                     value=0
                 ),
             ], style={'width': '49%', 'float': 'right', 'display': 'inline-block'}),
 
             html.Div(
                 [
-                    html.Button('Насос', id='Nasos', style={
+                    html.Button('Насос', id='Nasos', className="btn btn-primary", style={
                         'width': '15%', 'display': 'inline-block', 'margin': '1%'}),
-                    html.Button('Нагреватель1', id='Nagrev', style={
+                    html.Button('Нагреватель1', className="btn btn-primary", id='Nagrev', style={
                         'width': '15%', 'display': 'inline-block', 'margin': '1%'}),
-                    html.Button('Нагреватель2', id='Nagrev', style={
+                    html.Button('Нагреватель2', className="btn btn-primary", id='Nagrev', style={
                         'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
-                    html.Button('Нагреватель3', id='Nagrev', style={
+                    html.Button('Нагреватель3', className="btn btn-primary", id='Nagrev', style={
                         'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
-                    html.Button('Клапан', id='Klap', style={
+                    html.Button('Клапан', className="btn btn-primary", id='Klap', style={
                         'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
-                    html.Button('Вентиль', id='Valve', style={
+                    html.Button('Вентиль', className="btn btn-primary", id='Valve', style={
                         'display': 'inline-block', 'width': '13%', 'margin': '1%'})
                 ])
-        ], style={
-            'borderBottom': 'thin lightgrey solid',
-            'backgroundColor': 'rgb(212, 232, 241)',
-            'padding': '15px 5px'
-        }),
+        ], ),
 
         html.Div([
             dcc.Graph(id='history-graph', animate=True),
         ],
         ),
     ]))
+
+
 # Это описание веб страницы
 app.layout = render
 
 callback_init()
 
+
+@app.callback(Output('parametr', 'options'),
+              [Input('Counter', 'value')])
+def get_param(counter):
+    q = db.engine.execute(text(
+        """SELECT name, unit, counters_parametrs.id_counters_parametrs AS id_parametrs 
+            FROM counters_parametrs JOIN parametrs ON counters_parametrs.id_parametrs = parametrs.id_parametrs
+            WHERE id_counters = :counter
+        """),
+        counter=1)
+    buf = [{
+        'label': '{name} ({unit})'.format(**i),
+        'value': i['id_parametrs']
+    }
+        for i in q]
+    return buf
+
 # Это пример коллбека, выполняется по таймеру и обновляет страницу без ее перезагрузки (декораток творит магию)
 @app.callback(Output('history-graph', 'figure'),
-              [Input('Interval', 'n_intervals'), Input('Counter', 'value'), Input('parametr', 'value')])
-def get_history(tick,param):
-    # df = db.engine.execute('select * from History')
-    # new = df(value=rnd.random(), counters_parametr=rnd.choice(db.engine.execute('select * from Counters_parametrs')))
-
+              [Input('Interval', 'n_intervals'),
+               Input('parametr', 'value')])
+def get_history(tick, param):
     # тут осуществляю связь многие ко многим ,чтоб параметры могли быть равны value=values and time = time
-    new = db.engine.execute("select * from counters_parametrs join val on "
-                            "counters_parametrs.id_counters_parametrs = val.id_counters_parametrs "
-                            "UNION "
-                            "select * from counters_parametrs join history on "
-                            "counters_parametrs.id_counters_parametrs = history.id_counters_parametrs where value = values and time =time")
-    # commit
-    db.session.add(new)
-    db.session.commit()
+    query = db.engine.execute(text("""
+    select time, `values` as val from history WHERE id_counters_parametrs = :param
+    """), param=param)
+
+    query = list(query)
+
+    x = list([i['time'] for i in query])
+    y = [i['val'] for i in query]
+
 
 
     return {
         'data': [go.Scatter(
             # тут я хочу привязать данные из списка к history
             # пытаюсь вывести это на график
-            x=new[new['time'] == tick]['Value'],
-            y=new[new['values'] == param]['Value'],
-            mode='markers',
+            x=x,
+            y=y,
+            mode='lines+markers',
             marker={
-                'size': 15,
+                'size': 10,
                 'opacity': 0.5,
-                'line': {'width': 0.5, 'color': 'white'}
+                'line': {'width': 0.5, 'color': 'black'}
             }
         )],
         'layout': go.Layout(
 
             margin={'l': 40, 'b': 30, 't': 10, 'r': 0},
             height=450,
-            hovermode='closest'
-        )
+            yaxis={
+                'range': [min(0, min(y)), max(50, max(y) + 3)]}
+        ),
     }

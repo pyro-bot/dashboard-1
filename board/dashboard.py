@@ -52,24 +52,20 @@ def render():
 
             html.Div(
                 [
-                    html.Button('Насос', id='Nasos', style={
+                    html.Button('Насос', id='Nasos', className="btn btn-primary", style={
                         'width': '15%', 'display': 'inline-block', 'margin': '1%'}),
-                    html.Button('Нагреватель1', id='Nagrev', style={
+                    html.Button('Нагреватель1', className="btn btn-primary", id='Nagrev', style={
                         'width': '15%', 'display': 'inline-block', 'margin': '1%'}),
-                    html.Button('Нагреватель2', id='Nagrev', style={
+                    html.Button('Нагреватель2', className="btn btn-primary", id='Nagrev', style={
                         'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
-                    html.Button('Нагреватель3', id='Nagrev', style={
+                    html.Button('Нагреватель3', className="btn btn-primary", id='Nagrev', style={
                         'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
-                    html.Button('Клапан', id='Klap', style={
+                    html.Button('Клапан', className="btn btn-primary", id='Klap', style={
                         'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
-                    html.Button('Вентиль', id='Valve', style={
+                    html.Button('Вентиль', className="btn btn-primary", id='Valve', style={
                         'display': 'inline-block', 'width': '13%', 'margin': '1%'})
                 ])
-        ], style={
-            'borderBottom': 'thin lightgrey solid',
-            'backgroundColor': 'rgb(212, 232, 241)',
-            'padding': '15px 5px'
-        }),
+        ], ),
 
         html.Div([
             dcc.Graph(id='history-graph', animate=True),
@@ -83,19 +79,20 @@ app.layout = render
 
 callback_init()
 
+
 @app.callback(Output('parametr', 'options'),
               [Input('Counter', 'value')])
 def get_param(counter):
     q = db.engine.execute(text(
-"""SELECT name, unit, counters_parametrs.id_counters_parametrs AS id_parametrs 
-    FROM counters_parametrs JOIN parametrs ON counters_parametrs.id_parametrs = parametrs.id_parametrs
-    WHERE id_counters = :counter
-"""),
+        """SELECT name, unit, counters_parametrs.id_counters_parametrs AS id_parametrs 
+            FROM counters_parametrs JOIN parametrs ON counters_parametrs.id_parametrs = parametrs.id_parametrs
+            WHERE id_counters = :counter
+        """),
         counter=1)
     buf = [{
-            'label': '{name} ({unit})'.format(**i),
-            'value': i['id_parametrs']
-        }
+        'label': '{name} ({unit})'.format(**i),
+        'value': i['id_parametrs']
+    }
         for i in q]
     return buf
 
@@ -114,27 +111,27 @@ def get_history(tick, param):
     x = list([i['time'] for i in query])
     y = [i['val'] for i in query]
 
+
+
     return {
         'data': [go.Scatter(
             # тут я хочу привязать данные из списка к history
             # пытаюсь вывести это на график
             x=x,
             y=y,
-            mode='scatter',
+            mode='lines+markers',
             marker={
-                'size': 15,
+                'size': 10,
                 'opacity': 0.5,
-                'line': {'width': 0.5, 'color': 'white'}
+                'line': {'width': 0.5, 'color': 'black'}
             }
         )],
         'layout': go.Layout(
 
             margin={'l': 40, 'b': 30, 't': 10, 'r': 0},
             height=450,
-            hovermode='closest',
-            yaxis = {
-                'range': [0, 100]
-            }
-        )
+            yaxis={
+                'range': [min(0, min(y)), max(50, max(y) + 3)]}
+        ),
     }
 

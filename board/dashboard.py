@@ -11,6 +11,7 @@ import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 from sqlalchemy import inspect, text
+import numpy as np
 
 rnd = random.Random()
 
@@ -110,16 +111,16 @@ def get_history(tick, param):
 
     query = list(query)
 
-    x = [i['time'] for i in query]
-    y = [float(i['val']) for i in query]
+    x = list([i['time'] for i in query])
+    y = [i['val'] for i in query]
 
     return {
         'data': [go.Scatter(
             # тут я хочу привязать данные из списка к history
             # пытаюсь вывести это на график
-            # x=x,
+            x=x,
             y=y,
-            mode='markers',
+            mode='scatter',
             marker={
                 'size': 15,
                 'opacity': 0.5,
@@ -130,6 +131,10 @@ def get_history(tick, param):
 
             margin={'l': 40, 'b': 30, 't': 10, 'r': 0},
             height=450,
-            hovermode='closest'
+            hovermode='closest',
+            yaxis = {
+                'range': [0, 100]
+            }
         )
     }
+

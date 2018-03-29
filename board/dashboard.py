@@ -3,7 +3,7 @@ from . import models
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
-import random
+import datetime
 from board import page
 from board.bootstrap_dash import *
 import plotly.graph_objs as go
@@ -13,7 +13,6 @@ from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 from sqlalchemy import inspect, text
 import numpy as np
 
-rnd = random.Random()
 
 app.css.append_css({
     "external_url": ['/static/css/bootstrap.css', '/static/css/bootstrap-theme.css']})
@@ -88,7 +87,7 @@ def get_param(counter):
             FROM counters_parametrs JOIN parametrs ON counters_parametrs.id_parametrs = parametrs.id_parametrs
             WHERE id_counters = :counter
         """),
-        counter=1)
+        counter=counter)
     buf = [{
         'label': '{name} ({unit})'.format(**i),
         'value': i['id_parametrs']
@@ -131,7 +130,11 @@ def get_history(tick, param):
             margin={'l': 40, 'b': 30, 't': 10, 'r': 0},
             height=450,
             yaxis={
-                'range': [min(0, min(y)), max(50, max(y) + 3)]}
+                'range': [min(0, min(y or [0])), max(50, max(y or [50]) + 3)]
+            },
+            xaxis={
+                'range': [min(x or [datetime.datetime.today()]) - datetime.timedelta(days=1), max(x or [datetime.datetime.today()]) + datetime.timedelta(days=1)]
+            },
         ),
     }
 

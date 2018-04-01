@@ -3,7 +3,7 @@ from . import models
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
-import random
+import datetime
 from board import page
 from board.bootstrap_dash import *
 import plotly.graph_objs as go
@@ -12,8 +12,9 @@ from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 from sqlalchemy import inspect, text
 import numpy as np
+from pyorbital.orbital import Orbital
 
-rnd = random.Random()
+satellite = Orbital('TERRA')
 
 app.css.append_css({
     "external_url": ['/static/css/bootstrap.css', '/static/css/bootstrap-theme.css']})
@@ -28,7 +29,6 @@ def render():
             interval=2 * 1000,  # in milliseconds
             n_intervals=0
         ),
-
         html.Div([
             html.Div([
                 html.H3('Счетчик'),
@@ -71,8 +71,8 @@ def render():
             dcc.Graph(id='history-graph', animate=True),
         ],
         ),
+        html.Div(id='live-update-text'),
     ]))
-
 
 # Это описание веб страницы
 app.layout = render
@@ -88,7 +88,7 @@ def get_param(counter):
             FROM counters_parametrs JOIN parametrs ON counters_parametrs.id_parametrs = parametrs.id_parametrs
             WHERE id_counters = :counter
         """),
-        counter=1)
+        counter=counter)
     buf = [{
         'label': '{name} ({unit})'.format(**i),
         'value': i['id_parametrs']
@@ -110,9 +110,6 @@ def get_history(tick, param):
 
     x = list([i['time'] for i in query])
     y = [i['val'] for i in query]
-
-
-
     return {
         'data': [go.Scatter(
             # тут я хочу привязать данные из списка к history
@@ -131,7 +128,26 @@ def get_history(tick, param):
             margin={'l': 40, 'b': 30, 't': 10, 'r': 0},
             height=450,
             yaxis={
-                'range': [min(0, min(y)), max(50, max(y) + 3)]}
+                'range': [min(0, min(y or [0])), max(50, max(y or [50]) + 3)]
+            },
+            xaxis={
+                'range': [min(x or [datetime.datetime.today()]) - datetime.timedelta(days=1),
+                          max(x or [datetime.datetime.today()]) + datetime.timedelta(days=1)]
+            },
         ),
     }
 
+
+# тут пытаюсь обновить текст , но как то скудно
+@app.callback(Output('live-update-text', 'children'),
+              [Input('Interval', 'n_intervals'), ])
+def update_metrics(param):
+    query = db.engine.execute(text("""
+        select time, `values` as val from history WHERE id_counters_parametrs = :param
+        """), param=param)
+    y = [i['val'] for i in query]
+
+    style = {'padding': '5px', 'fontSize': '16px'}
+    return [
+        html.Span('Значение: {}'.format(y), style=style)
+    ]

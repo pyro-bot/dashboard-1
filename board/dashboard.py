@@ -151,3 +151,4 @@ def update_metrics(param):
     return [
         html.Span('Значение: {}'.format(y), style=style)
     ]
+

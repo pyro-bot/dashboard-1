@@ -74,6 +74,7 @@ def render():
         html.Div(id='live-update-text'),
     ]))
 
+
 # Это описание веб страницы
 app.layout = render
 
@@ -135,35 +136,26 @@ def get_history(tick, param):
                           max(x or [datetime.datetime.today()]) + datetime.timedelta(days=1)]
             },
         ),
+
     }
 
 
 # тут пытаюсь обновить текст , но как то скудно
 @app.callback(Output('live-update-text', 'children'),
-              [Input('Interval', 'n_intervals')],
-              [State('live-update-text', 'children')])
-def update_metrics(param, live):
-    # добавил запрос на мгновенные значения и State
-    query = db.engine.execute(text("""
-        select `value` as val from val WHERE id_counters_parametrs = :param
-        """), param=param)
+              [Input('Interval', 'n_intervals')]
+              )  # ,Input('parametr', 'value')])
+def update_metrics(f):
+    # a = db.engine.execute(text("""
+    # select `counters_parametrs.id_counters_parametrs` AS id_counters_parametrs,`value` as val from counters_parametrs val join
+    # on countres_parametrs.id_counters_parametrs = val.id_counters_parametrs  where id_counters_parametrs :=val"""),
+    # val=val)
 
-    # добавил массив для x и то же не понял для чег он
-    x = [i['val'] for i in query]
+    query = db.engine.execute('select  `value` as val from val ')
     y = [i['val'] for i in query]
-
     style = {'padding': '5px', 'fontSize': '16px'}
-
-    # что и просили ,сделал через if, но что то не понял
-    if y:
-        return html.Span('Значение :'.format(y, live), style=style)
-    else:
-        print(y)
-
-    # return [html.Span('CPU: {}%'.format(y), style=style)]
-    # она работает ,читает данные из базы
-    # вот пример https://qiita.com/driller/items/49e3b6084ec034353dc1#live-updates
-
+    return [
+        html.Span('Значение: {0}'.format(y[-1]), style=style)
+    ]
 
 @app.callback(Input('Nasos', 'n_clicks'))
 def but(a):

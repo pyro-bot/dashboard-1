@@ -1,3 +1,5 @@
+from time import sleep
+
 from . import dash as app, db
 from . import models
 from dash.dependencies import Input, Output, State
@@ -12,9 +14,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 from sqlalchemy import inspect, text
 import numpy as np
-from pyorbital.orbital import Orbital
 
-satellite = Orbital('TERRA')
 
 app.css.append_css({
     "external_url": ['/static/css/bootstrap.css', '/static/css/bootstrap-theme.css']})
@@ -54,11 +54,11 @@ def render():
                 [
                     html.Button('Насос', id='Nasos', className="btn btn-primary", style={
                         'width': '15%', 'display': 'inline-block', 'margin': '1%'}),
-                    html.Button('Нагреватель1', className="btn btn-primary", id='Nagrev', style={
+                    html.Button('Нагреватель1', className="btn btn-primary", id='Nagrev1', style={
                         'width': '15%', 'display': 'inline-block', 'margin': '1%'}),
-                    html.Button('Нагреватель2', className="btn btn-primary", id='Nagrev', style={
+                    html.Button('Нагреватель2', className="btn btn-primary", id='Nagrev2', style={
                         'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
-                    html.Button('Нагреватель3', className="btn btn-primary", id='Nagrev', style={
+                    html.Button('Нагреватель3', className="btn btn-primary", id='Nagrev3', style={
                         'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
                     html.Button('Клапан', className="btn btn-primary", id='Klap', style={
                         'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
@@ -140,15 +140,68 @@ def get_history(tick, param):
 
 # тут пытаюсь обновить текст , но как то скудно
 @app.callback(Output('live-update-text', 'children'),
-              [Input('Interval', 'n_intervals'), ])
-def update_metrics(param):
+              [Input('Interval', 'n_intervals')],
+              [State('live-update-text', 'children')])
+def update_metrics(param, live):
+    # добавил запрос на мгновенные значения и State
     query = db.engine.execute(text("""
-        select time, `values` as val from history WHERE id_counters_parametrs = :param
+        select `value` as val from val WHERE id_counters_parametrs = :param
         """), param=param)
+
+    # добавил массив для x и то же не понял для чег он
+    x = [i['val'] for i in query]
     y = [i['val'] for i in query]
 
     style = {'padding': '5px', 'fontSize': '16px'}
-    return [
-        html.Span('Значение: {}'.format(y), style=style)
-    ]
 
+    # что и просили ,сделал через if, но что то не понял
+    if y:
+        return html.Span('Значение :'.format(y, live), style=style)
+    else:
+        print(y)
+
+    # return [html.Span('CPU: {}%'.format(y), style=style)]
+    # она работает ,читает данные из базы
+    # вот пример https://qiita.com/driller/items/49e3b6084ec034353dc1#live-updates
+
+
+@app.callback(Input('Nasos', 'n_clicks'))
+def but(a):
+    print('test1')
+    sleep(3)
+    print('test1')
+
+
+@app.callback(Input('Nagrev1', 'n_clicks'))
+def but(a):
+    print('test2')
+    sleep(3)
+    print('test2')
+
+
+@app.callback(Input('Nagrev2', 'n_clicks'))
+def but(a):
+    print('test3')
+    sleep(3)
+    print('test3')
+
+
+@app.callback(Input('Nagrev3', 'n_clicks'))
+def but(a):
+    print('test4')
+    sleep(3)
+    print('test4')
+
+
+@app.callback(Input('Klap', 'n_clicks'))
+def but(a):
+    print('test5')
+    sleep(3)
+    print('test5')
+
+
+@app.callback(Input('Valve', 'n_clicks'))
+def but(a):
+    print('test6')
+    sleep(3)
+    print('test6')

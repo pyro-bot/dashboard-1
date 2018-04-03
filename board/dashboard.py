@@ -1,5 +1,3 @@
-from time import sleep
-
 from . import dash as app, db
 from . import models
 from dash.dependencies import Input, Output, State
@@ -14,7 +12,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 from sqlalchemy import inspect, text
 import numpy as np
-
+import requests
 
 app.css.append_css({
     "external_url": ['/static/css/bootstrap.css', '/static/css/bootstrap-theme.css']})
@@ -142,58 +140,45 @@ def get_history(tick, param):
 
 # тут пытаюсь обновить текст , но как то скудно
 @app.callback(Output('live-update-text', 'children'),
-              [Input('Interval', 'n_intervals')]
-              )  # ,Input('parametr', 'value')])
-def update_metrics(f):
-    # a = db.engine.execute(text("""
-    # select `counters_parametrs.id_counters_parametrs` AS id_counters_parametrs,`value` as val from counters_parametrs val join
-    # on countres_parametrs.id_counters_parametrs = val.id_counters_parametrs  where id_counters_parametrs :=val"""),
-    # val=val)
-
-    query = db.engine.execute('select  `value` as val from val ')
+              [Input('Interval', 'n_intervals'),
+               Input('parametr', 'value')],
+              )
+def update_metrics(n_intervals, param):
+    query = db.engine.execute(text('select `value` as val from val WHERE id_counters_parametrs=:param'), param=param)
     y = [i['val'] for i in query]
+    if len(y) > 0:
+        y = y[0]
+    else:
+        y = 0
     style = {'padding': '5px', 'fontSize': '16px'}
     return [
-        html.Span('Значение: {0}'.format(y[-1]), style=style)
+        html.Span('Значение: {0}'.format(y), style=style)
     ]
 
 @app.callback(Input('Nasos', 'n_clicks'))
 def but(a):
-    print('test1')
-    sleep(3)
-    print('test1')
-
+    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+    r.status_code
 
 @app.callback(Input('Nagrev1', 'n_clicks'))
 def but(a):
-    print('test2')
-    sleep(3)
-    print('test2')
+    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+    r.status_code
 
 
 @app.callback(Input('Nagrev2', 'n_clicks'))
 def but(a):
-    print('test3')
-    sleep(3)
-    print('test3')
-
-
+    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+    r.status_code
 @app.callback(Input('Nagrev3', 'n_clicks'))
 def but(a):
-    print('test4')
-    sleep(3)
-    print('test4')
-
-
+    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+    r.status_code
 @app.callback(Input('Klap', 'n_clicks'))
 def but(a):
-    print('test5')
-    sleep(3)
-    print('test5')
-
-
+    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+    r.status_code
 @app.callback(Input('Valve', 'n_clicks'))
 def but(a):
-    print('test6')
-    sleep(3)
-    print('test6')
+    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+    r.status_code

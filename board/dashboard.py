@@ -17,6 +17,7 @@ import requests
 app.css.append_css({
     "external_url": ['/static/css/bootstrap.css', '/static/css/bootstrap-theme.css']})
 
+status = {}
 
 # Метод нужен для первоначальной отрисовки страицы
 
@@ -157,37 +158,42 @@ def update_metrics(n_intervals, param):
     ]
 
 
-@app.callback(Input('Nasos', 'n_clicks'))
+
+@app.callback(Output('Nasos', 'className'),
+              [Input('Nasos', 'n_clicks')])
 def but(a):
-    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
-    r.status_code
-
-
-@app.callback(Input('Nagrev1', 'n_clicks'))
-def but(a):
-    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
-    r.status_code
-
-
-@app.callback(Input('Nagrev2', 'n_clicks'))
-def but(a):
-    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
-    r.status_code
-
-
-@app.callback(Input('Nagrev3', 'n_clicks'))
-def but(a):
-    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
-    r.status_code
-
-
-@app.callback(Input('Klap', 'n_clicks'))
-def but(a):
-    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
-    r.status_code
-
-
-@app.callback(Input('Valve', 'n_clicks'))
-def but(a):
-    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
-    r.status_code
+    global status
+    r = requests.get('http://127.0.0.1:5001/switch', timeout=10)
+    if r.status_code == 200:
+        status['pump'] = r.json()['status']
+        return 'btn btn-success' if status['pump'] == 1 else 'btn btn-danger'
+#
+#
+# @app.callback(Input('Nagrev1', 'n_clicks'))
+# def but(a):
+#     r = requests.get('https:/127.0.0:5000/Старт')
+#     r.status_code
+#
+#
+# @app.callback(Input('Nagrev2', 'n_clicks'))
+# def but(a):
+#     r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+#     r.status_code
+#
+#
+# @app.callback(Input('Nagrev3', 'n_clicks'))
+# def but(a):
+#     r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+#     r.status_code
+#
+#
+# @app.callback(Input('Klap', 'n_clicks'))
+# def but(a):
+#     r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+#     r.status_code
+#
+#
+# @app.callback(Input('Valve', 'n_clicks'))
+# def but(a):
+#     r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+#     r.status_code

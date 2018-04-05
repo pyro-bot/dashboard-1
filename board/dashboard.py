@@ -51,17 +51,17 @@ def render():
 
             html.Div(
                 [
-                    html.Button('Насос', id='Nasos', className="btn btn-primary", style={
+                    html.Button('Насос', id='pump', className='btn btn-success', style={
                         'width': '15%', 'display': 'inline-block', 'margin': '1%'}),
-                    html.Button('Нагреватель1', className="btn btn-primary", id='Nagrev1', style={
+                    html.Button('Нагреватель1', className='btn btn-success', id='heater1', style={
                         'width': '15%', 'display': 'inline-block', 'margin': '1%'}),
-                    html.Button('Нагреватель2', className="btn btn-primary", id='Nagrev2', style={
+                    html.Button('Нагреватель2', className='btn btn-success', id='heater2', style={
                         'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
-                    html.Button('Нагреватель3', className="btn btn-primary", id='Nagrev3', style={
+                    html.Button('Нагреватель3', className='btn btn-success', id='heater3', style={
                         'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
-                    html.Button('Клапан', className="btn btn-primary", id='Klap', style={
+                    html.Button('Клапан', className='btn btn-success', id='Klap', style={
                         'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
-                    html.Button('Вентиль', className="btn btn-primary", id='Valve', style={
+                    html.Button('Вентиль', className='btn btn-success', id='Valve', style={
                         'display': 'inline-block', 'width': '13%', 'margin': '1%'})
                 ])
         ], ),
@@ -159,41 +159,61 @@ def update_metrics(n_intervals, param):
 
 
 
-@app.callback(Output('Nasos', 'className'),
-              [Input('Nasos', 'n_clicks')])
+@app.callback(Output('pump', 'className'),
+              [Input('pump', 'n_clicks')])
 def but(a):
     global status
-    r = requests.get('http://127.0.0.1:5001/switch', timeout=10)
+    r = requests.get('http://127.0.0.1:5001/switch-pump', timeout=10)
     if r.status_code == 200:
         status['pump'] = r.json()['status']
         return 'btn btn-success' if status['pump'] == 1 else 'btn btn-danger'
-#
-#
-# @app.callback(Input('Nagrev1', 'n_clicks'))
-# def but(a):
-#     r = requests.get('https:/127.0.0:5000/Старт')
-#     r.status_code
-#
-#
-# @app.callback(Input('Nagrev2', 'n_clicks'))
-# def but(a):
-#     r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
-#     r.status_code
-#
-#
-# @app.callback(Input('Nagrev3', 'n_clicks'))
-# def but(a):
-#     r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
-#     r.status_code
-#
-#
-# @app.callback(Input('Klap', 'n_clicks'))
-# def but(a):
-#     r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
-#     r.status_code
-#
-#
-# @app.callback(Input('Valve', 'n_clicks'))
-# def but(a):
-#     r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
-#     r.status_code
+
+
+@app.callback(Output('heater1', 'className'),
+              [Input('heater1', 'n_clicks')])
+def but(a):
+    global status
+    r = requests.get('http://127.0.0.1:5001/switch-heater1', timeout=10)
+    if r.status_code == 200:
+        status['heater1'] = r.json()['status']
+        return 'btn btn-success' if status['heater1'] == 1 else 'btn btn-danger'
+
+
+@app.callback(Output('heater2', 'className'),
+              [Input('heater2', 'n_clicks')])
+def but(a):
+    global status
+    r = requests.get('http://127.0.0.1:5001/switch-heater2', timeout=10)
+    if r.status_code == 200:
+        status['heater2'] = r.json()['status']
+        return 'btn btn-success' if status['heater2'] == 1 else 'btn btn-danger'
+
+
+@app.callback(Output('heater3', 'className'),
+              [Input('heater3', 'n_clicks')])
+def but(a):
+    global status
+    r = requests.get('http://127.0.0.1:5001/switch-heater3', timeout=10)
+    if r.status_code == 200:
+        status['heater3'] = r.json()['status']
+        return 'btn btn-success' if status['heater3'] == 1 else 'btn btn-danger'
+
+
+@app.callback(Output('Klap', 'className'),
+              [Input('Klap', 'n_clicks')])
+def but(a):
+    global status
+    r = requests.get('http://127.0.0.1:5001/switch-klap', timeout=10)
+    if r.status_code == 200:
+        status['klap'] = r.json()['status']
+        return 'btn btn-success' if status['klap'] == 1 else 'btn btn-danger'
+
+
+@app.callback(Output('Valve', 'className'),
+              [Input('Valve', 'n_clicks')])
+def but(a):
+    global status
+    r = requests.get('http://127.0.0.1:5001/switch-valve', timeout=10)
+    if r.status_code == 200:
+        status['valve'] = r.json()['status']
+        return 'btn btn-success' if status['valve'] == 1 else 'btn btn-danger'

@@ -1,5 +1,3 @@
-from time import sleep
-
 from . import dash as app, db
 from . import models
 from dash.dependencies import Input, Output, State
@@ -14,7 +12,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 from sqlalchemy import inspect, text
 import numpy as np
-
+import requests
 
 app.css.append_css({
     "external_url": ['/static/css/bootstrap.css', '/static/css/bootstrap-theme.css']})
@@ -97,6 +95,7 @@ def get_param(counter):
         for i in q]
     return buf
 
+
 # Это пример коллбека, выполняется по таймеру и обновляет страницу без ее перезагрузки (декораток творит магию)
 @app.callback(Output('history-graph', 'figure'),
               [Input('Interval', 'n_intervals'),
@@ -146,11 +145,6 @@ def get_history(tick, param):
                Input('parametr', 'value')],
               )
 def update_metrics(n_intervals, param):
-    # a = db.engine.execute(text("""
-    # select `counters_parametrs.id_counters_parametrs` AS id_counters_parametrs,`value` as val from counters_parametrs val join
-    # on countres_parametrs.id_counters_parametrs = val.id_counters_parametrs  where id_counters_parametrs :=val"""),
-    # val=val)
-
     query = db.engine.execute(text('select `value` as val from val WHERE id_counters_parametrs=:param'), param=param)
     y = [i['val'] for i in query]
     if len(y) > 0:
@@ -162,49 +156,38 @@ def update_metrics(n_intervals, param):
         html.Span('Значение: {0}'.format(y), style=style)
     ]
 
-@app.callback(Output('btn-pump', 'className'),
-              [Input('Interval', 'n_intervals'),
-               Input('btn-pump', 'n_clicks')])
-def btn_pump_update(n_clicks, n_intervals):
-    state = 1
-#
-# @app.callback(Input('Nasos', 'n_clicks'))
-# def but(a):
-#     print('test1')
-#     sleep(3)
-#     print('test1')
-#
-#
-# @app.callback(Input('Nagrev1', 'n_clicks'))
-# def but(a):
-#     print('test2')
-#     sleep(3)
-#     print('test2')
-#
-#
-# @app.callback(Input('Nagrev2', 'n_clicks'))
-# def but(a):
-#     print('test3')
-#     sleep(3)
-#     print('test3')
-#
-#
-# @app.callback(Input('Nagrev3', 'n_clicks'))
-# def but(a):
-#     print('test4')
-#     sleep(3)
-#     print('test4')
-#
-#
-# @app.callback(Input('Klap', 'n_clicks'))
-# def but(a):
-#     print('test5')
-#     sleep(3)
-#     print('test5')
-#
-#
-# @app.callback(Input('Valve', 'n_clicks'))
-# def but(a):
-#     print('test6')
-#     sleep(3)
-#     print('test6')
+
+@app.callback(Input('Nasos', 'n_clicks'))
+def but(a):
+    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+    r.status_code
+
+
+@app.callback(Input('Nagrev1', 'n_clicks'))
+def but(a):
+    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+    r.status_code
+
+
+@app.callback(Input('Nagrev2', 'n_clicks'))
+def but(a):
+    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+    r.status_code
+
+
+@app.callback(Input('Nagrev3', 'n_clicks'))
+def but(a):
+    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+    r.status_code
+
+
+@app.callback(Input('Klap', 'n_clicks'))
+def but(a):
+    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+    r.status_code
+
+
+@app.callback(Input('Valve', 'n_clicks'))
+def but(a):
+    r = requests.get('https:/127.0.0:5000/Старт', auth=(0, 1))
+    r.status_code

@@ -1,0 +1,23 @@
+[Unit]
+Description=Server GPIO
+
+[Service]
+PIDFile=/run/gunicorn/pid
+User=root
+Group=root
+RuntimeDirectory=gunicorn
+WorkingDirectory=/root/web/
+ExecStart=/usr/local/bin/gunicorn --pid /run/gunicorn/pid   \
+          --bind 127.0.0.1:5001 server:app_serv   \
+          --log-file /root/logs/log.log   \
+          --capture-output  \
+          --access-logfile /root/logs/access.log \
+          --timeout 60 \
+          --access-logformat "[dev.api] %(h)s %(l)s %(u)s %(t)s .%(r)s. %(s)s %(b)s .%(f)s. .%(a)s. conn=\"%({Connection}i)s\""
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+

@@ -11,7 +11,6 @@ import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 from sqlalchemy import inspect, text
-import numpy as np
 import requests
 
 app.css.append_css({
@@ -52,17 +51,13 @@ def render():
             html.Div(
                 [
                     html.Button('Насос', id='pump', className='btn btn-success', style={
-                        'width': '15%', 'display': 'inline-block', 'margin': '1%'}),
-                    html.Button('Нагреватель1', className='btn btn-success', id='heater1', style={
-                        'width': '15%', 'display': 'inline-block', 'margin': '1%'}),
-                    html.Button('Нагреватель2', className='btn btn-success', id='heater2', style={
-                        'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
-                    html.Button('Нагреватель3', className='btn btn-success', id='heater3', style={
-                        'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
-                    html.Button('Клапан', className='btn btn-success', id='Klap', style={
-                        'display': 'inline-block', 'width': '15%', 'margin': '1%'}),
-                    html.Button('Вентиль', className='btn btn-success', id='Valve', style={
-                        'display': 'inline-block', 'width': '13%', 'margin': '1%'})
+                        'width': '25%', 'display': 'inline-block', 'margin': '1%'}),
+                    html.Button('Нагреватель', className='btn btn-success', id='heater1', style={
+                        'width': '25%', 'display': 'inline-block', 'margin': '1%'}),
+                    html.Button('Клапан', className='btn btn-success', id='klap', style={
+                        'display': 'inline-block', 'width': '25%', 'margin': '1%'}),
+                    html.Button('Вентиль', className='btn btn-success', id='valve', style={
+                        'display': 'inline-block', 'width': '25%', 'margin': '1%'}),
                 ])
         ], ),
 
@@ -179,28 +174,8 @@ def but(a):
         return 'btn btn-success' if status['heater1'] == 1 else 'btn btn-danger'
 
 
-@app.callback(Output('heater2', 'className'),
-              [Input('heater2', 'n_clicks')])
-def but(a):
-    global status
-    r = requests.get('http://127.0.0.1:5001/switch-heater2', timeout=10)
-    if r.status_code == 200:
-        status['heater2'] = r.json()['status']
-        return 'btn btn-success' if status['heater2'] == 1 else 'btn btn-danger'
-
-
-@app.callback(Output('heater3', 'className'),
-              [Input('heater3', 'n_clicks')])
-def but(a):
-    global status
-    r = requests.get('http://127.0.0.1:5001/switch-heater3', timeout=10)
-    if r.status_code == 200:
-        status['heater3'] = r.json()['status']
-        return 'btn btn-success' if status['heater3'] == 1 else 'btn btn-danger'
-
-
-@app.callback(Output('Klap', 'className'),
-              [Input('Klap', 'n_clicks')])
+@app.callback(Output('klap', 'className'),
+              [Input('klap', 'n_clicks')])
 def but(a):
     global status
     r = requests.get('http://127.0.0.1:5001/switch-klap', timeout=10)
@@ -209,8 +184,8 @@ def but(a):
         return 'btn btn-success' if status['klap'] == 1 else 'btn btn-danger'
 
 
-@app.callback(Output('Valve', 'className'),
-              [Input('Valve', 'n_clicks')])
+@app.callback(Output('valve', 'className'),
+              [Input('valve', 'n_clicks')])
 def but(a):
     global status
     r = requests.get('http://127.0.0.1:5001/switch-valve', timeout=10)

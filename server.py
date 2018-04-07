@@ -44,7 +44,10 @@ class Switch_pump(Resource):
     def get(self):
         global status
         pump = status['pump'] ^ 1
+<<<<<<< HEAD:server.py
         gpio.output(led1, pump)
+=======
+>>>>>>> pr/8:board/server.py
         status['pump'] = pump
         return {'status': status['pump']}
 
@@ -59,7 +62,10 @@ class Switch_heater1(Resource):
     def get(self):
         global status
         heater1 = status['heater1'] ^ 1
+<<<<<<< HEAD:server.py
         gpio.output(led2, heater1)
+=======
+>>>>>>> pr/8:board/server.py
         status['heater1'] = heater1
         return {'status': status['heater1']}
 
@@ -67,6 +73,7 @@ class Switch_heater1(Resource):
 api.add_resource(Switch_heater1, '/switch-heater1')
 
 
+<<<<<<< HEAD:server.py
 class Switch_heater2(Resource):
     @marshal_with({
         'status': fields.Integer(default=0)
@@ -97,6 +104,8 @@ class Switch_heater3(Resource):
 api.add_resource(Switch_heater3, '/switch-heater3')
 
 
+=======
+>>>>>>> pr/8:board/server.py
 class Switch_klap(Resource):
     @marshal_with({
         'status': fields.Integer(default=0)
@@ -104,7 +113,10 @@ class Switch_klap(Resource):
     def get(self):
         global status
         heater1 = status['klap'] ^ 1
+<<<<<<< HEAD:server.py
         gpio.output(led5, heater1)
+=======
+>>>>>>> pr/8:board/server.py
         status['klap'] = heater1
         return {'status': status['klap']}
 
@@ -119,7 +131,10 @@ class Switch_valve(Resource):
     def get(self):
         global status
         heater1 = status['valve'] ^ 1
+<<<<<<< HEAD:server.py
         gpio.output(led6, heater1)
+=======
+>>>>>>> pr/8:board/server.py
         status['valve'] = heater1
         return {'status': status['valve']}
 
